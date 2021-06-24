@@ -1,0 +1,2376 @@
+- access_cpreg:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT 1 FROM DUAL
+    interval: 30s
+
+- android_all:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        SELECT
+        sum(case when OS_TYPE='1' and application_type='2' and (RECEIVED_DATE is not null or received_to_device_date is not null) then 1 else 0 end) as "mobile_bank_ra",
+        Sum(case when OS_TYPE='1' and application_type='2' and RECEIVED_DATE is null and received_to_device_date is null then 1 else 0 end) as "mobile_bank_nra",
+        SUm(case when OS_TYPE='1' and application_type='1' and (RECEIVED_DATE is not null or received_to_device_date is not null) then 1 else 0 end) as "my_credit_ra",
+        SUM(case when OS_TYPE='1' and application_type='1' and RECEIVED_DATE is null and received_to_device_date is null then 1 else 0 end) as "mycredit_nra",
+        sUM(case when OS_TYPE='1' and application_type='3' and RECEIVED_DATE is null and received_to_device_date is null then 1 else 0 end) as "mobilebanker_nra",
+        sUm(case when OS_TYPE='1' and application_type='3' and (RECEIVED_DATE is not null or received_to_device_date is not null) then 1 else 0 end) as "mobilebanker_ra"
+        FROM MESSAGES
+        where CREATE_DATE>=trunc(sysdate)
+        group by (to_char(CREATE_DATE,'HH24')*'6'+ floor(to_char(CREATE_DATE,'MI')/'10'))
+        order by (to_char(CREATE_DATE,'HH24')*'6'+ floor(to_char(CREATE_DATE,'MI')/'10')) desc
+        ) where ROWNUM='1'
+    sub-metrics:
+        sum: mobile_bank_ra
+        Sum: mobile_bank_nra
+        SUm: my_credit_ra
+        SUM: mycredit_nra
+        sUM: mobilebanker_nra
+        sUm: mobilebanker_ra
+    interval: 60s
+
+- ios_all:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        SELECT
+        sum(case when OS_TYPE='2' and application_type='2' and RECEIVED_DATE is not null then 1 else 0 end) as "mobile_bank_ri",
+        Sum(case when OS_TYPE='2' and application_type='2' and RECEIVED_DATE is null then 1 else 0 end) as "mobile_bank_nri",
+        SUm(case when (OS_TYPE='2' or os_type='5') and application_type='1' and RECEIVED_DATE is not null then 1 else 0 end) as "my_credit_ri",
+        SUM(case when (OS_TYPE='2' or os_type='5') and application_type='1' and RECEIVED_DATE is null then 1 else 0 end) as "mycredit_nri",
+        sUM(case when OS_TYPE='2' and application_type='3' and RECEIVED_DATE is null then 1 else 0 end) as "mobilebanker_nri",
+        sUm(case when OS_TYPE='2' and application_type='3' and RECEIVED_DATE is not null then 1 else 0 end) as "mobilebanker_ri"
+        FROM MESSAGES
+        where CREATE_DATE>=trunc(sysdate)
+        group by (to_char(CREATE_DATE,'HH24')*'6'+ floor(to_char(CREATE_DATE,'MI')/'10'))
+        order by (to_char(CREATE_DATE,'HH24')*'6'+ floor(to_char(CREATE_DATE,'MI')/'10')) desc
+        ) where ROWNUM='1'
+    sub-metrics:
+        sum: mobile_bank_ri
+        Sum: mobile_bank_nri
+        SUm: my_credit_ri
+        SUM: mycredit_nri
+        sUM: mobilebanker_nri
+        sUm: mobilebanker_ri
+    interval: 60s
+
+- recieved_all:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        SELECT
+        sum(case when (RECEIVED_DATE is not null or received_to_device_date is not null) then 1 else 0 end) as "success_delivered_recieved",
+        SUM(case when RECEIVED_DATE is null and received_to_device_date is null then 1 else 0 end) as "not_delivered_recieved"
+        FROM MESSAGES
+        where CREATE_DATE>=trunc(sysdate)
+        group by (to_char(CREATE_DATE,'HH24')*'6'+ floor(to_char(CREATE_DATE,'MI')/'10'))
+        order by (to_char(CREATE_DATE,'HH24')*'6'+ floor(to_char(CREATE_DATE,'MI')/'10')) desc
+        ) where ROWNUM='1'
+    sub-metrics:
+        sum: success_delivered_recieved
+        SUM: not_delivered_recieved
+    interval: 60s
+
+- send_push:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        SELECT
+        sum(case when send_date is not null then 1 else 0 end) as "success_send",
+        SUM(case when send_date is null then 1 else 0 end) as "not_send"
+        FROM MESSAGES
+        where CREATE_DATE>=trunc(sysdate)
+        group by (to_char(CREATE_DATE,'HH24')*'6'+ floor(to_char(CREATE_DATE,'MI')/'10'))
+        order by (to_char(CREATE_DATE,'HH24')*'6'+ floor(to_char(CREATE_DATE,'MI')/'10')) desc
+        ) where ROWNUM='1'
+    sub-metrics:
+        sum: success_send
+        SUM: not_send
+    interval: 60s
+
+- success_registered_today:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        SELECT count(*) as "success_registered_today"
+        FROM sbr_device
+        where CREATE_DATE>=trunc(sysdate) and IS_SEND_PUSH_ENABLED='1' and dev_token is not null and device_failed_date is null
+        ) where ROWNUM='1'
+    sub-metrics:
+        count: success_registered_today
+    interval: 60s
+
+- reject_registered_today:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        SELECT count(*) as "reject_registered_today"
+        FROM sbr_device
+        where CREATE_DATE>=trunc(sysdate) and (IS_SEND_PUSH_ENABLED='0' or dev_token is null or device_failed_date is not null)
+        ) where ROWNUM='1'
+    sub-metrics:
+        count: reject_registered_today
+    interval: 60s
+
+- total_push_android:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT count(*) as "total_push_android"
+        FROM MESSAGES
+        where CREATE_DATE>=trunc(sysdate) and os_type='1'
+        group by to_char(sysdate, 'DD.MM.YYYY')
+    sub-metrics:
+        count: total_push_android
+    interval: 200s
+
+- total_push_ios:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT count(*) as "total_push_ios"
+        FROM MESSAGES
+        where CREATE_DATE>=trunc(sysdate) and os_type='2'
+        group by to_char(sysdate, 'DD.MM.YYYY')
+    sub-metrics:
+        count: total_push_ios
+    interval: 200s
+
+- smsgate_hcb_file_register:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT
+        sum(case when send_status='0' then 1 else 0 end) as "process_generation",
+        Sum(case when send_status='1' then 1 else 0 end) as "process_sent",
+        SUm(case when send_status='2' then 1 else 0 end) as "sent_successful",
+        SUM(case when send_status='3' then 1 else 0 end) as "successful_processed",
+        sUm(case when send_status='4' then 1 else 0 end) as "error"
+        FROM cms_hcb.hcb_file_register
+        where process_date>=trunc(sysdate)
+    sub-metrics:
+        sum: process_generation
+        Sum: process_sent
+        SUm: sent_successful
+        SUM: successful_processed
+        sUm: error
+    interval: 60s
+
+- smsgate_out_sms:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        SELECT
+        sum(case when ACTUAL_MODULE_NAME='tele2-smpp' and sent_date is not null then 1 else 0 end) as "tele2-smpp",
+        Sum(case when ACTUAL_MODULE_NAME='mts-smpp' and sent_date is not null  then 1 else 0 end) as "mts-smpp",
+        SUm(case when ACTUAL_MODULE_NAME='beeline-smpp' and sent_date is not null then 1 else 0 end) as "beeline-smpp",
+        SUM(case when ACTUAL_MODULE_NAME='megafon-smpp' and sent_date is not null then 1 else 0 end) as "megafon-smpp",
+        sUm(case when ACTUAL_MODULE_NAME='push' and sent_date is not null then 1 else 0 end) as "push",
+        sUM(case when ACTUAL_MODULE_NAME='smstraffic-smpp' and sent_date is null then 1 else 0 end) as "smstraffic-smpp"
+        FROM cms_hcb.out_sms_v
+        where create_date>=trunc(sysdate)
+        group by (to_char(create_date,'HH24')*'6'+ floor(to_char(create_date,'MI')/'10'))
+        order by (to_char(create_date,'HH24')*'6'+ floor(to_char(create_date,'MI')/'10')) desc
+        ) where ROWNUM='1'
+    sub-metrics:
+        sum: tele2-smpp
+        Sum: mts-smpp
+        SUm: beeline-smpp
+        SUM: megafon-smpp
+        sUm: push
+        sUM: smstraffic-smpp
+    interval: 10m
+
+- smsgate_out_sms_notsuccess:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        SELECT
+        sum(case when ACTUAL_MODULE_NAME='tele2-smpp' and sent_date is null then 1 else 0 end) as "tele2-smpp",
+        Sum(case when ACTUAL_MODULE_NAME='mts-smpp' and sent_date is null  then 1 else 0 end) as "mts-smpp",
+        SUm(case when ACTUAL_MODULE_NAME='beeline-smpp' and sent_date is null then 1 else 0 end) as "beeline-smpp",
+        SUM(case when ACTUAL_MODULE_NAME='megafon-smpp' and sent_date is null then 1 else 0 end) as "megafon-smpp",
+        sUm(case when ACTUAL_MODULE_NAME='push' and sent_date is null then 1 else 0 end) as "push",
+        sUM(case when ACTUAL_MODULE_NAME='smstraffic-smpp' and sent_date is null then 1 else 0 end) as "smstraffic-smpp"
+        FROM cms_hcb.out_sms_v
+        where create_date>=trunc(sysdate)
+        group by (to_char(create_date,'HH24')*'6'+ floor(to_char(create_date,'MI')/'10'))
+        order by (to_char(create_date,'HH24')*'6'+ floor(to_char(create_date,'MI')/'10')) desc
+        ) where ROWNUM='1'
+    sub-metrics:
+        sum: tele2-smpp
+        Sum: mts-smpp
+        SUm: beeline-smpp
+        SUM: megafon-smpp
+        sUm: push
+        sUM: smstraffic-smpp
+    interval: 60s
+
+- smsgate_out_sms_notdelivered:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        SELECT
+        sum(case when ACTUAL_MODULE_NAME='tele2-smpp' and delivered_date is null then 1 else 0 end) as "tele2-smpp",
+        Sum(case when ACTUAL_MODULE_NAME='mts-smpp' and delivered_date is null  then 1 else 0 end) as "mts-smpp",
+        SUm(case when ACTUAL_MODULE_NAME='beeline-smpp' and delivered_date is null then 1 else 0 end) as "beeline-smpp",
+        SUM(case when ACTUAL_MODULE_NAME='megafon-smpp' and delivered_date is null then 1 else 0 end) as "megafon-smpp",
+        sUm(case when ACTUAL_MODULE_NAME='push' and delivered_date is null then 1 else 0 end) as "push",
+        sUM(case when ACTUAL_MODULE_NAME='smstraffic-smpp' and sent_date is null then 1 else 0 end) as "smstraffic-smpp"
+        FROM cms_hcb.out_sms_v
+        where create_date>=trunc(sysdate)
+        group by (to_char(create_date,'HH24')*'6'+ floor(to_char(create_date,'MI')/'10'))
+        order by (to_char(create_date,'HH24')*'6'+ floor(to_char(create_date,'MI')/'10')) desc
+        ) where ROWNUM='1'
+    sub-metrics:
+        sum: tele2-smpp
+        Sum: mts-smpp
+        SUm: beeline-smpp
+        SUM: megafon-smpp
+        sUm: push
+        sUM: smstraffic-smpp
+    interval: 60s
+
+- smsgate_out_sms_delivery:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        SELECT
+        sum(case when ACTUAL_MODULE_NAME='tele2-smpp' and delivered_date is not null then 1 else 0 end) as "tele2-smpp",
+        Sum(case when ACTUAL_MODULE_NAME='mts-smpp' and delivered_date is not null  then 1 else 0 end) as "mts-smpp",
+        SUm(case when ACTUAL_MODULE_NAME='beeline-smpp' and delivered_date is not null then 1 else 0 end) as "beeline-smpp",
+        SUM(case when ACTUAL_MODULE_NAME='megafon-smpp' and delivered_date is not null then 1 else 0 end) as "megafon-smpp",
+        sUm(case when ACTUAL_MODULE_NAME='push' and delivered_date is not null then 1 else 0 end) as "push",
+        sUM(case when ACTUAL_MODULE_NAME='smstraffic-smpp' and sent_date is null then 1 else 0 end) as "smstraffic-smpp"
+        FROM cms_hcb.out_sms_v
+        where create_date>=trunc(sysdate)
+        group by (to_char(create_date,'HH24')*'6'+ floor(to_char(create_date,'MI')/'10'))
+        order by (to_char(create_date,'HH24')*'6'+ floor(to_char(create_date,'MI')/'10')) desc
+        ) where ROWNUM='1'
+    sub-metrics:
+        sum: tele2-smpp
+        Sum: mts-smpp
+        SUm: beeline-smpp
+        SUM: megafon-smpp
+        sUm: push
+        sUM: smstraffic-smpp
+    interval: 60s
+
+- smsgate_wast_operator_mts:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT sum(trunc(OPERATOR_PRICE,2)) as "mts" FROM cms_hcb.out_sms_arch_v
+        where create_date>=trunc(sysdate) and OPERATOR_PRICE is not null and ACTUAL_MODULE_NAME='mts-smpp'
+    sub-metrics:
+        sum: mts
+    interval: 60s
+
+- operations_same_type:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT count(*) as "odnotipnii" FROM(
+        select msisdn
+        from cms_hcb.out_sms_arch_v a
+        join CMS_HCB.hcb_templates b on b.service_id=a.service_id
+        where CREATE_DATE>=TRUNC(SYSDATE)
+        and b.name='ALERTPHONE'
+        and STATUS_ID='4'
+        group by msisdn having count(*)>20
+        )
+    sub-metrics:
+        count: odnotipnii
+    interval: 5m
+
+- smsgate_wast_operator_smstraffic:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT sum(trunc(OPERATOR_PRICE,2)) as "smstraffic" FROM cms_hcb.out_sms_arch_v
+        where create_date>=trunc(sysdate) and OPERATOR_PRICE is not null and ACTUAL_MODULE_NAME='smstraffic-smpp'
+    sub-metrics:
+        sum: smstraffic
+    interval: 60s
+
+- smsgate_wast_operator_beeline:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT sum(trunc(OPERATOR_PRICE,2)) as "beeline" FROM cms_hcb.out_sms_arch_v
+        where create_date>=trunc(sysdate) and OPERATOR_PRICE is not null and ACTUAL_MODULE_NAME='beeline-smpp'
+    sub-metrics:
+        sum: beeline
+    interval: 60s
+
+- smsgate_wast_operator_tele2:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT sum(trunc(OPERATOR_PRICE,2)) as "tele2" FROM cms_hcb.out_sms_arch_v
+        where create_date>=trunc(sysdate) and OPERATOR_PRICE is not null and ACTUAL_MODULE_NAME='tele2-smpp'
+    sub-metrics:
+        sum: tele2
+    interval: 60s
+
+- smsgate_wast_operator_megafon:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT sum(trunc(OPERATOR_PRICE,2)) as "megafon" FROM cms_hcb.out_sms_arch_v
+        where create_date>=trunc(sysdate) and OPERATOR_PRICE is not null and ACTUAL_MODULE_NAME='megafon-smpp'
+    sub-metrics:
+        sum: megafon
+    interval: 60s
+
+- ibs_in:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        select CNT from(
+        select CNT, ROW_NUMBER() OVER (ORDER BY START_DATE DESC) AS RowNumber
+        from hc_servicename.monitoring_session
+        where CHANNEL = 'IBS'
+        ) where RowNumber = '2'
+    sub-metrics:
+        count: deferred
+    interval: 10m
+
+- mbs_in:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        select CNT from(
+        select CNT, ROW_NUMBER() OVER (ORDER BY START_DATE DESC) AS RowNumber
+        from hc_servicename.monitoring_session
+        where CHANNEL = 'MBS'
+        ) where RowNumber = '2'
+    sub-metrics:
+        count: deferred
+    interval: 5m
+
+- smsgate_time_sent_mts:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        select
+        count(case when diff1 <= 1 then 1 end) as "sec1",
+        Count(case when (diff1 <= 10 and diff1 > 1) then 1 end) as "sec10",
+        COunt(case when (diff1 <= 30 and diff1 > 10) then 1 end) as "sec30",
+        COUnt(case when (diff1 <= 60 and diff1 > 30) then 1 end) as "min1",
+        COUNt(case when (diff1 <= 180 and diff1 > 60) then 1 end) as "min3",
+        COUNT(case when (diff1 <= 600 and diff1 > 180) then 1 end) as "min10",
+        cOunt(case when diff1 > 600 then 1 end) as "min10plus"
+        from (
+        select (extract(day from diff)*86400 + (extract(hour from diff))*3600 + extract(minute from diff)*60 + extract(second from diff)) as diff1
+        from (
+        select cast(SENT_DATE as TIMESTAMP)-cast(CREATE_DATE as TIMESTAMP) as diff
+        from cms_hcb.out_sms_v
+        where create_date>=trunc(sysdate) and SENT_DATE is not null and ACTUAL_MODULE_NAME='mts-smpp'
+        ORDER BY create_date desc
+        )
+        )
+        ) where ROWNUM='1'
+    sub-metrics:
+        count: sec1
+        Count: sec10
+        COunt: sec30
+        COUnt: min1
+        COUNt: min3
+        COUNT: min10
+        cOunt: min10plus
+    interval: 70s
+
+- smsgate_time_sent_smstraffic:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        select
+        count(case when diff1 <= 1 then 1 end) as "sec1",
+        Count(case when (diff1 <= 10 and diff1 > 1) then 1 end) as "sec10",
+        COunt(case when (diff1 <= 30 and diff1 > 10) then 1 end) as "sec30",
+        COUnt(case when (diff1 <= 60 and diff1 > 30) then 1 end) as "min1",
+        COUNt(case when (diff1 <= 180 and diff1 > 60) then 1 end) as "min3",
+        COUNT(case when (diff1 <= 600 and diff1 > 180) then 1 end) as "min10",
+        cOunt(case when diff1 > 600 then 1 end) as "min10plus"
+        from (
+        select (extract(day from diff)*86400 + (extract(hour from diff))*3600 + extract(minute from diff)*60 + extract(second from diff)) as diff1
+        from (
+        select cast(SENT_DATE as TIMESTAMP)-cast(CREATE_DATE as TIMESTAMP) as diff
+        from cms_hcb.out_sms_v
+        where create_date>=trunc(sysdate) and SENT_DATE is not null and ACTUAL_MODULE_NAME='smstraffic-smpp'
+        ORDER BY create_date desc
+        )
+        )
+        ) where ROWNUM='1'
+    sub-metrics:
+        count: sec1
+        Count: sec10
+        COunt: sec30
+        COUnt: min1
+        COUNt: min3
+        COUNT: min10
+        cOunt: min10plus
+    interval: 70s
+
+- smsgate_time_delivered_smstraffic:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        select
+        count(case when diff1 <= 1 then 1 end) as "sec1",
+        Count(case when (diff1 <= 10 and diff1 > 1) then 1 end) as "sec10",
+        COunt(case when (diff1 <= 30 and diff1 > 10) then 1 end) as "sec30",
+        COUnt(case when (diff1 <= 60 and diff1 > 30) then 1 end) as "min1",
+        COUNt(case when (diff1 <= 180 and diff1 > 60) then 1 end) as "min3",
+        COUNT(case when (diff1 <= 600 and diff1 > 180) then 1 end) as "min10",
+        cOunt(case when diff1 > 600 then 1 end) as "min10plus"
+        from (
+        select (extract(day from diff)*86400 + (extract(hour from diff))*3600 + extract(minute from diff)*60 + extract(second from diff)) as diff1
+        from (
+        select cast(DELIVERED_DATE as TIMESTAMP)-cast(SENT_DATE as TIMESTAMP) as diff
+        from cms_hcb.out_sms_v
+        where create_date>=trunc(sysdate) and DELIVERED_DATE is not null and ACTUAL_MODULE_NAME='smstraffic-smpp'
+        ORDER BY create_date desc
+        )
+        )
+        ) where ROWNUM='1'
+    sub-metrics:
+        count: sec1
+        Count: sec10
+        COunt: sec30
+        COUnt: min1
+        COUNt: min3
+        COUNT: min10
+        cOunt: min10plus
+    interval: 3m
+
+- smsgate_time_delivered_mts:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        select
+        count(case when diff1 <= 1 then 1 end) as "sec1",
+        Count(case when (diff1 <= 10 and diff1 > 1) then 1 end) as "sec10",
+        COunt(case when (diff1 <= 30 and diff1 > 10) then 1 end) as "sec30",
+        COUnt(case when (diff1 <= 60 and diff1 > 30) then 1 end) as "min1",
+        COUNt(case when (diff1 <= 180 and diff1 > 60) then 1 end) as "min3",
+        COUNT(case when (diff1 <= 600 and diff1 > 180) then 1 end) as "min10",
+        cOunt(case when diff1 > 600 then 1 end) as "min10plus"
+        from (
+        select (extract(day from diff)*86400 + (extract(hour from diff))*3600 + extract(minute from diff)*60 + extract(second from diff)) as diff1
+        from (
+        select cast(DELIVERED_DATE as TIMESTAMP)-cast(SENT_DATE as TIMESTAMP) as diff
+        from cms_hcb.out_sms_v
+        where create_date>=trunc(sysdate) and DELIVERED_DATE is not null and ACTUAL_MODULE_NAME='mts-smpp'
+        ORDER BY create_date desc
+        )
+        )
+        ) where ROWNUM='1'
+    sub-metrics:
+        count: sec1
+        Count: sec10
+        COunt: sec30
+        COUnt: min1
+        COUNt: min3
+        COUNT: min10
+        cOunt: min10plus
+    interval: 70s
+
+- smsgate_time_sent_beeline:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        select
+        count(case when diff1 <= 1 then 1 end) as "sec1",
+        Count(case when (diff1 <= 10 and diff1 > 1) then 1 end) as "sec10",
+        COunt(case when (diff1 <= 30 and diff1 > 10) then 1 end) as "sec30",
+        COUnt(case when (diff1 <= 60 and diff1 > 30) then 1 end) as "min1",
+        COUNt(case when (diff1 <= 180 and diff1 > 60) then 1 end) as "min3",
+        COUNT(case when (diff1 <= 600 and diff1 > 180) then 1 end) as "min10",
+        cOunt(case when diff1 > 600 then 1 end) as "min10plus"
+        from (
+        select (extract(day from diff)*86400 + (extract(hour from diff))*3600 + extract(minute from diff)*60 + extract(second from diff)) as diff1
+        from (
+        select cast(SENT_DATE as TIMESTAMP)-cast(CREATE_DATE as TIMESTAMP) as diff
+        from cms_hcb.out_sms_v
+        where create_date>=trunc(sysdate) and SENT_DATE is not null and ACTUAL_MODULE_NAME='beeline-smpp'
+        ORDER BY create_date desc
+        )
+        )
+        ) where ROWNUM='1'
+    sub-metrics:
+        count: sec1
+        Count: sec10
+        COunt: sec30
+        COUnt: min1
+        COUNt: min3
+        COUNT: min10
+        cOunt: min10plus
+    interval: 70s
+
+- smsgate_time_delivered_beeline:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        select
+        count(case when diff1 <= 1 then 1 end) as "sec1",
+        Count(case when (diff1 <= 10 and diff1 > 1) then 1 end) as "sec10",
+        COunt(case when (diff1 <= 30 and diff1 > 10) then 1 end) as "sec30",
+        COUnt(case when (diff1 <= 60 and diff1 > 30) then 1 end) as "min1",
+        COUNt(case when (diff1 <= 180 and diff1 > 60) then 1 end) as "min3",
+        COUNT(case when (diff1 <= 600 and diff1 > 180) then 1 end) as "min10",
+        cOunt(case when diff1 > 600 then 1 end) as "min10plus"
+        from (
+        select (extract(day from diff)*86400 + (extract(hour from diff))*3600 + extract(minute from diff)*60 + extract(second from diff)) as diff1
+        from (
+        select cast(DELIVERED_DATE as TIMESTAMP)-cast(SENT_DATE as TIMESTAMP) as diff
+        from cms_hcb.out_sms_v
+        where create_date>=trunc(sysdate) and DELIVERED_DATE is not null and ACTUAL_MODULE_NAME='beeline-smpp'
+        ORDER BY create_date desc
+        )
+        )
+        ) where ROWNUM='1'
+    sub-metrics:
+        count: sec1
+        Count: sec10
+        COunt: sec30
+        COUnt: min1
+        COUNt: min3
+        COUNT: min10
+        cOunt: min10plus
+    interval: 70s
+
+- smsgate_time_sent_megafon:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        select
+        count(case when diff1 <= 1 then 1 end) as "sec1",
+        Count(case when (diff1 <= 10 and diff1 > 1) then 1 end) as "sec10",
+        COunt(case when (diff1 <= 30 and diff1 > 10) then 1 end) as "sec30",
+        COUnt(case when (diff1 <= 60 and diff1 > 30) then 1 end) as "min1",
+        COUNt(case when (diff1 <= 180 and diff1 > 60) then 1 end) as "min3",
+        COUNT(case when (diff1 <= 600 and diff1 > 180) then 1 end) as "min10",
+        cOunt(case when diff1 > 600 then 1 end) as "min10plus"
+        from (
+        select (extract(day from diff)*86400 + (extract(hour from diff))*3600 + extract(minute from diff)*60 + extract(second from diff)) as diff1
+        from (
+        select cast(SENT_DATE as TIMESTAMP)-cast(CREATE_DATE as TIMESTAMP) as diff
+        from cms_hcb.out_sms_v
+        where create_date>=trunc(sysdate) and SENT_DATE is not null and ACTUAL_MODULE_NAME='megafon-smpp'
+        ORDER BY create_date desc
+        )
+        )
+        ) where ROWNUM='1'
+    sub-metrics:
+        count: sec1
+        Count: sec10
+        COunt: sec30
+        COUnt: min1
+        COUNt: min3
+        COUNT: min10
+        cOunt: min10plus
+    interval: 70s
+
+- smsgate_time_delivered_megafon:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        select
+        count(case when diff1 <= 1 then 1 end) as "sec1",
+        Count(case when (diff1 <= 10 and diff1 > 1) then 1 end) as "sec10",
+        COunt(case when (diff1 <= 30 and diff1 > 10) then 1 end) as "sec30",
+        COUnt(case when (diff1 <= 60 and diff1 > 30) then 1 end) as "min1",
+        COUNt(case when (diff1 <= 180 and diff1 > 60) then 1 end) as "min3",
+        COUNT(case when (diff1 <= 600 and diff1 > 180) then 1 end) as "min10",
+        cOunt(case when diff1 > 600 then 1 end) as "min10plus"
+        from (
+        select (extract(day from diff)*86400 + (extract(hour from diff))*3600 + extract(minute from diff)*60 + extract(second from diff)) as diff1
+        from (
+        select cast(DELIVERED_DATE as TIMESTAMP)-cast(SENT_DATE as TIMESTAMP) as diff
+        from cms_hcb.out_sms_v
+        where create_date>=trunc(sysdate) and DELIVERED_DATE is not null and ACTUAL_MODULE_NAME='megafon-smpp'
+        ORDER BY create_date desc
+        )
+        )
+        ) where ROWNUM='1'
+    sub-metrics:
+        count: sec1
+        Count: sec10
+        COunt: sec30
+        COUnt: min1
+        COUNt: min3
+        COUNT: min10
+        cOunt: min10plus
+    interval: 70s
+
+- smsgate_time_sent_tele2:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        select
+        count(case when diff1 <= 1 then 1 end) as "sec1",
+        Count(case when (diff1 <= 10 and diff1 > 1) then 1 end) as "sec10",
+        COunt(case when (diff1 <= 30 and diff1 > 10) then 1 end) as "sec30",
+        COUnt(case when (diff1 <= 60 and diff1 > 30) then 1 end) as "min1",
+        COUNt(case when (diff1 <= 180 and diff1 > 60) then 1 end) as "min3",
+        COUNT(case when (diff1 <= 600 and diff1 > 180) then 1 end) as "min10",
+        cOunt(case when diff1 > 600 then 1 end) as "min10plus"
+        from (
+        select (extract(day from diff)*86400 + (extract(hour from diff))*3600 + extract(minute from diff)*60 + extract(second from diff)) as diff1
+        from (
+        select cast(SENT_DATE as TIMESTAMP)-cast(CREATE_DATE as TIMESTAMP) as diff
+        from cms_hcb.out_sms_v
+        where create_date>=trunc(sysdate) and SENT_DATE is not null and ACTUAL_MODULE_NAME='tele2-smpp'
+        ORDER BY create_date desc
+        )
+        )
+        ) where ROWNUM='1'
+    sub-metrics:
+        count: sec1
+        Count: sec10
+        COunt: sec30
+        COUnt: min1
+        COUNt: min3
+        COUNT: min10
+        cOunt: min10plus
+    interval: 70s
+
+- smsgate_time_delivered_tele2:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        select
+        count(case when diff1 <= 1 then 1 end) as "sec1",
+        Count(case when (diff1 <= 10 and diff1 > 1) then 1 end) as "sec10",
+        COunt(case when (diff1 <= 30 and diff1 > 10) then 1 end) as "sec30",
+        COUnt(case when (diff1 <= 60 and diff1 > 30) then 1 end) as "min1",
+        COUNt(case when (diff1 <= 180 and diff1 > 60) then 1 end) as "min3",
+        COUNT(case when (diff1 <= 600 and diff1 > 180) then 1 end) as "min10",
+        cOunt(case when diff1 > 600 then 1 end) as "min10plus"
+        from (
+        select (extract(day from diff)*86400 + (extract(hour from diff))*3600 + extract(minute from diff)*60 + extract(second from diff)) as diff1
+        from (
+        select cast(DELIVERED_DATE as TIMESTAMP)-cast(SENT_DATE as TIMESTAMP) as diff
+        from cms_hcb.out_sms_v
+        where create_date>=trunc(sysdate) and DELIVERED_DATE is not null and ACTUAL_MODULE_NAME='tele2-smpp'
+        ORDER BY create_date desc
+        )
+        )
+        ) where ROWNUM='1'
+    sub-metrics:
+        count: sec1
+        Count: sec10
+        COunt: sec30
+        COUnt: min1
+        COUNt: min3
+        COUNT: min10
+        cOunt: min10plus
+    interval: 70s
+
+- smsgate_organizations_price3:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT
+        SUM(case when "name"='product-support' then "price" else 0 end) as "product-support",
+        SUm(case when "name"='retail-business' then "price" else 0 end) as "retail-business",
+        Sum(case when "name"='RTDM' then "price" else 0 end) as "rtdm",
+        sum(case when "name"='Tranz' then "price" else 0 end) as "tranz",
+        sUM(case when "name"='TRASH' then "price" else 0 end) as "trash",
+        suM(case when "name"='UBA' then "price" else 0 end) as "uba",
+        SuM(case when "name"='Visa' then "price" else 0 end) as "visa",
+        sUm(case when "name"='ИТ' then "price" else 0 end) as "it"
+        FROM(
+        SELECT b.name as "name",sum(trunc(a.OPERATOR_PRICE,2)) as "price"
+        FROM cms_hcb.out_sms_arch_v a
+        join cms_hcb.organizations b on b.id=a.partner_id
+        WHERE a.CREATE_DATE>=TRUNC(SYSDATE) and a.OPERATOR_PRICE is not null
+        group by b.name
+        )
+    sub-metrics:
+        SUM: product-support
+        SUm: retail-business
+        Sum: rtdm
+        sum: tranz
+        sUM: trash
+        suM: uba
+        SuM: visa
+        sUm: it
+    interval: 60s
+
+- smsgate_organizations_price2:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT
+        SUM(case when "name"='kupinekopi-mkk' then "price" else 0 end) as "kupinekopi-mkk",
+        SUm(case when "name"='LinStartap' then "price" else 0 end) as "linstartap",
+        Sum(case when "name"='marketing' then "price" else 0 end) as "marketing",
+        sum(case when "name"='MBR' then "price" else 0 end) as "mbr",
+        sUM(case when "name"='NPS' then "price" else 0 end) as "nps",
+        suM(case when "name"='oper_dep' then "price" else 0 end) as "oper_dep",
+        SuM(case when "name"='Polza' then "price" else 0 end) as "polza",
+        sUm(case when "name"='Polza (УЭиПЛ)' then "price" else 0 end) as "polz"
+        FROM(
+        SELECT b.name as "name",sum(trunc(a.OPERATOR_PRICE,2)) as "price"
+        FROM cms_hcb.out_sms_arch_v a
+        join cms_hcb.organizations b on b.id=a.partner_id
+        WHERE a.CREATE_DATE>=TRUNC(SYSDATE) and a.OPERATOR_PRICE is not null
+        group by b.name
+        )
+    sub-metrics:
+        SUM: kupinekopi-mkk
+        SUm: linstartap
+        Sum: marketing
+        sum: mbr
+        sUM: nps
+        suM: oper_dep
+        SuM: polza
+        sUm: polz
+    interval: 60s
+
+- smsgate_organizations_price1:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT
+        SUM(case when "name"='Client-service' then "price" else 0 end) as "client-service",
+        SUm(case when "name"='Client-service-development' then "price" else 0 end) as "client-service-development",
+        Sum(case when "name"='Collection' then "price" else 0 end) as "collection",
+        sum(case when "name"='credit-card-support' then "price" else 0 end) as "credit-card-support",
+        sUM(case when "name"='DEKP' then "price" else 0 end) as "dekp",
+        suM(case when "name"='DRPT' then "price" else 0 end) as "drpt",
+        SuM(case when "name"='HR' then "price" else 0 end) as "hr",
+        sUm(case when "name"='Internet-proekt' then "price" else 0 end) as "internet-proekt"
+        FROM(
+        SELECT b.name as "name",sum(trunc(a.OPERATOR_PRICE,2)) as "price"
+        FROM cms_hcb.out_sms_arch_v a
+        join cms_hcb.organizations b on b.id=a.partner_id
+        WHERE a.CREATE_DATE>=TRUNC(SYSDATE) and a.OPERATOR_PRICE is not null
+        group by b.name
+        )
+    sub-metrics:
+        SUM: client-service
+        SUm: client-service-development
+        Sum: collection
+        sum: credit-card-support
+        sUM: dekp
+        suM: drpt
+        SuM: hr
+        sUm: internet-proekt
+    interval: 60s
+
+- smsgate_double_sms:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT count("kolvo") as double FROM(
+        select count(mess_id) as "kolvo"
+        from cms_hcb.out_sms_arch_v
+        where  CREATE_DATE>=TRUNC(SYSDATE)
+        and STATUS_ID='4'
+        group by mess_id having count(*)>1
+        )
+    sub-metrics:
+        count: double
+    interval: 60s
+
+- smsgate_error_mv_share:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        select count(*) as "error_mv_share" from cms_hcb.HCB_WCS_EXPORT_QUEUE
+        where CREATE_DATE>=TRUNC(SYSDATE)
+        and STATUS='FAILED'
+        ) where ROWNUM='1'
+    sub-metrics:
+        count: error_mv_share
+    interval: 60s
+
+- smsgate_statistics:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+       SELECT
+       sum(case when ERROR_DESCRIPTION='PUSH not active' then 1 else 0 end) as "pushnotactive",
+       Sum(case when ERROR_DESCRIPTION='PUSH answer error' then 1 else 0 end) as "pushanswererror",
+       SUm(case when ERROR_DESCRIPTION='Abonent_Is_In_Black_list' or ERROR_DESCRIPTION='No description!' or ERROR_DESCRIPTION='Not connected to server' or ERROR_DESCRIPTION='error-address-blocked' or ERROR_DESCRIPTION='Message expired' then 1 else 0 end) as "othererrors",
+       SUM(case when delivered_date is not null and channel_type='PUSH' then 1 else 0 end) as "deliveredpush",
+       sUm(case when delivered_date is not null and channel_type='SMS' then 1 else 0 end) as "deliveredsms",
+       sUM(case when delivered_date is null and channel_type='PUSH' and ERROR_DESCRIPTION!='PUSH not active' then 1 else 0 end) as "notdeliveredpush",
+       suM(case when delivered_date is null and channel_type='SMS' then 1 else 0 end) as "notdeliveredsms"
+       FROM cms_hcb.out_sms_arch_v
+       where CREATE_DATE>=TRUNC(SYSDATE)
+    sub-metrics:
+        sum: pushnotactive
+        Sum: pushanswererror
+        SUm: othererrors
+        SUM: deliveredpush
+        sUm: deliveredsms
+        sUM: notdeliveredpush
+        suM: notdeliveredsms
+    interval: 120s
+
+- smsgate_check_defferred:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+       SELECT count(*) as "check" FROM cms_hcb.WCS_DEFERRED_STORAGE
+       where CREATE_DATE>=TRUNC(SYSDATE,'mi')-INTERVAL '20' MINUTE
+       ORDER BY CREATE_DATE asc
+    sub-metrics:
+        count: check
+    interval: 1200s
+
+- smsgate_manzana:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+       SELECT
+       sum(case when a.ERROR_DESCRIPTION='PUSH not active' then 1 else 0 end) as "pushnotactive",
+       Sum(case when a.ERROR_DESCRIPTION='PUSH answer error' then 1 else 0 end) as "pushanswererror",
+       SUM(case when a.delivered_date is not null and a.channel_type='PUSH' then 1 else 0 end) as "deliveredpush",
+       sUm(case when a.delivered_date is not null and a.channel_type='SMS' then 1 else 0 end) as "deliveredsms",
+       sUM(case when a.delivered_date is null and a.channel_type='PUSH' and a.ERROR_DESCRIPTION!='PUSH not active' then 1 else 0 end) as "notdeliveredpush",
+       suM(case when a.delivered_date is null and a.channel_type='SMS' then 1 else 0 end) as "notdeliveredsms"
+       FROM cms_hcb.out_sms_arch_v a
+       join cms_hcb.hcb_source_systems b on b.id=a.SOURCE_SYSTEM_ID
+       where a.CREATE_DATE>=TRUNC(SYSDATE) and b.name='MANZANA'
+    sub-metrics:
+        sum: pushnotactive
+        Sum: pushanswererror
+        SUM: deliveredpush
+        sUm: deliveredsms
+        sUM: notdeliveredpush
+        suM: notdeliveredsms
+    interval: 60s
+
+- smsgate_delay_realtime:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+       select
+       count(case when diff1 <= 1 then 1 end) as "sec1",
+       Count(case when (diff1 <= 10 and diff1 > 1) then 1 end) as "sec10",
+       COunt(case when (diff1 <= 30 and diff1 > 10) then 1 end) as "sec30",
+       COUnt(case when (diff1 <= 60 and diff1 > 30) then 1 end) as "min1",
+       COUNt(case when (diff1 <= 180 and diff1 > 60) then 1 end) as "min3",
+       COUNT(case when (diff1 <= 600 and diff1 > 180) then 1 end) as "min10",
+       cOunt(case when diff1 > 600 then 1 end) as "min10plus"
+       from (
+       select t.*, (extract(day from diff)*86400 + (extract(hour from diff))*3600 + extract(minute from diff)*60 + extract(second from diff)) as diff1
+       from (
+       select a.*, cast(SENT_DATE as TIMESTAMP)-cast(CREATE_DATE as TIMESTAMP) as diff
+       from cms_hcb.out_sms_v a
+       join cms_hcb.hcb_templates b on b.service_id=a.service_id
+       where a.create_date>=trunc(sysdate)
+       and a.priority ='8'
+       and a.channel_type!='PUSH'
+       and b.name not in('Otklik_DDS','IBS_CHANNEL_PASS_RESET','IBS_CHANNEL_CONNECT','MBR_REG_CODE','GOP_STANDING_ORDER_NOTSELF_FEE','SMS_SERVICE_CARD')
+       ORDER BY a.create_date desc
+       )t
+       )
+    sub-metrics:
+        count: sec1
+        Count: sec10
+        COunt: sec30
+        COUnt: min1
+        COUNt: min3
+        COUNT: min10
+        cOunt: min10plus
+    interval: 60s
+
+- smsgate_delay_delivered_realtime:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+       select
+       count(case when diff1 <= 1 then 1 end) as "sec1",
+       Count(case when (diff1 <= 10 and diff1 > 1) then 1 end) as "sec10",
+       COunt(case when (diff1 <= 30 and diff1 > 10) then 1 end) as "sec30",
+       COUnt(case when (diff1 <= 60 and diff1 > 30) then 1 end) as "min1",
+       COUNt(case when (diff1 <= 180 and diff1 > 60) then 1 end) as "min3",
+       COUNT(case when (diff1 <= 600 and diff1 > 180) then 1 end) as "min10",
+       cOunt(case when diff1 > 600 then 1 end) as "min10plus"
+       from (
+       select t.*, (extract(day from diff)*86400 + (extract(hour from diff))*3600 + extract(minute from diff)*60 + extract(second from diff)) as diff1
+       from (
+       select a.*, cast(DELIVERED_DATE as TIMESTAMP)-cast(SENT_DATE as TIMESTAMP) as diff
+       from cms_hcb.out_sms_v a
+       join cms_hcb.hcb_templates b on b.service_id=a.service_id
+       where a.create_date>=trunc(sysdate)
+       and a.priority ='8'
+       and a.channel_type!='PUSH'
+       and b.name not in('Otklik_DDS','IBS_CHANNEL_PASS_RESET','IBS_CHANNEL_CONNECT','MBR_REG_CODE','GOP_STANDING_ORDER_NOTSELF_FEE','SMS_SERVICE_CARD')
+       ORDER BY a.create_date desc
+       )t
+       )
+    sub-metrics:
+        count: sec1
+        Count: sec10
+        COunt: sec30
+        COUnt: min1
+        COUNt: min3
+        COUNT: min10
+        cOunt: min10plus
+    interval: 60s
+
+#- smsgate_trafic_mfms:
+#    # Name of the driver to use.
+#    driver: oracle
+#
+#    # Connection information.
+#    connection:
+#        host: hostname
+#        port: 1521
+#        user: username
+#        password: password
+#        database: servicename
+#    #Запрос к БД
+#    sql: >
+#       SELECT *
+#       FROM(
+#       SELECT
+#       sum(case when ACTUAL_MODULE_NAME='mfms-mts-smpp' then 1 else 0 end) as "mtsmfms",
+#       Sum(case when ACTUAL_MODULE_NAME='mfms-beeline-smpp' then 1 else 0 end) as "beelinemfms",
+#       SUm(case when ACTUAL_MODULE_NAME='mfms-megafon-smpp' then 1 else 0 end) as "megafonmfms",
+#       SuM(case when ACTUAL_MODULE_NAME='megafon-smpp-rezerv' then 1 else 0 end) as "megafonrezerv",
+#       suM(case when ACTUAL_MODULE_NAME='tele2-smpp-rezerv' then 1 else 0 end) as "tele2rezerv",
+#       SUM(case when ACTUAL_MODULE_NAME='mfms-tele2-smpp' then 1 else 0 end) as "tele2mfms",
+#       sUm(case when ACTUAL_MODULE_NAME!='mfms-tele2-smpp' and ACTUAL_MODULE_NAME!='mfms-megafon-smpp' and ACTUAL_MODULE_NAME!='mfms-beeline-smpp' and ACTUAL_MODULE_NAME!='mfms-mts-smpp' and (ACTUAL_MODULE_NAME like '%mfms%') then 1 else 0 end) as "othermfms"
+#       FROM cms_hcb.out_sms_arch_v
+#       where create_date>=trunc(sysdate)
+#       group by (to_char(create_date,'HH24')*'6'+ floor(to_char(create_date,'MI')/'10'))
+#       order by (to_char(create_date,'HH24')*'6'+ floor(to_char(create_date,'MI')/'10')) desc)
+#       where ROWNUM='1'
+#    sub-metrics:
+#        sum: mtsmfms
+#        Sum: beelinemfms
+#        SUm: megafonmfms
+#        SUM: tele2mfms
+#        sUm: othermfms
+#        SuM: megafonrezerv
+#        suM: tele2rezerv
+#    interval: 60s
+
+- smsgate_out_sms_qq:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        SELECT
+        sum(case when ACTUAL_MODULE_NAME='tele2-smpp' and sent_date is not null then 1 else 0 end) as "tele2-smpp",
+        Sum(case when ACTUAL_MODULE_NAME='mts-smpp' and sent_date is not null  then 1 else 0 end) as "mts-smpp",
+        SUm(case when ACTUAL_MODULE_NAME='beeline-smpp' and sent_date is not null then 1 else 0 end) as "beeline-smpp",
+        SUM(case when ACTUAL_MODULE_NAME='megafon-smpp' and sent_date is not null then 1 else 0 end) as "megafon-smpp",
+        sUM(case when ACTUAL_MODULE_NAME='smstraffic-smpp' and sent_date is not null then 1 else 0 end) as "smstraffic-smpp",
+        suM(case when ACTUAL_MODULE_NAME='smsc-smpp' and sent_date is not null then 1 else 0 end) as "smsc-smpp"
+        FROM cms_hcb.out_sms_v
+        where create_date>=trunc(sysdate)
+        group by (to_char(create_date,'HH24')*'6'+ floor(to_char(create_date,'MI')/'10'))
+        order by (to_char(create_date,'HH24')*'6'+ floor(to_char(create_date,'MI')/'10')) desc
+        ) where ROWNUM='1'
+    sub-metrics:
+        sum: tele2-smpp
+        Sum: mts-smpp
+        SUm: beeline-smpp
+        SUM: megafon-smpp
+        sUM: smstraffic-smpp
+        suM: smsc-smpp
+    interval: 600s
+
+- push_device_failed_date:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        select
+        Sum(case when sd.device_failed_date is not null and sd.app_type='1' and sd.os_type='1' then 1 else 0 end) as "mk_android",
+        sUm(case when sd.device_failed_date is not null and sd.app_type='2' and sd.os_type='1' then 1 else 0 end) as "mb_android",
+        suM(case when sd.device_failed_date is not null and sd.app_type='1' and sd.os_type='2' then 1 else 0 end) as "mk_ios",
+        SUm(case when sd.device_failed_date is not null and sd.app_type='2' and sd.os_type='2' then 1 else 0 end) as "mb_ios",
+        sUM(case when sd.device_failed_date is not null and sd.app_type='1' and sd.os_type='5' then 1 else 0 end) as "mk_ios_voip",
+        sum(case when sd.device_failed_date is not null and sd.app_type='2' and sd.os_type='5' then 1 else 0 end) as "mb_ios_voip"
+        from SBR_DEVICE sd
+        where sd.DEVICE_FAILED_DATE>=to_date(sysdate)
+    sub-metrics:
+        Sum: mk_android
+        sUm: mb_android
+        suM: mk_ios
+        SUm: mb_ios
+        sUM: mk_ios_voip
+        sum: mb_ios_voip
+    interval: 1h
+
+- statistics_percent_day:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT
+        round((100/("SOAPAll"/"SOAPSent")),2) as "soappercent",
+        Round((100/("DBAll"/"DBSent")),2) as "dbpercent",
+        ROund((100/("FileAll"/"FileSent")),2) as "filepercent",
+        ROUnd((100/("PushAll"/"PushSent")),2) as "pushpercent",
+        ROUNd(((100/("SOAPAll"/"SOAPSent"))+(100/("DBAll"/"DBSent"))+(100/("FileAll"/"FileSent"))+(100/("PushAll"/"PushSent")))/4, 2) as "generalpercent"
+        FROM(
+        select to_char(create_date,'DD.MM.YYYY'),
+        sum(case when WCS_CONTENT_TYPE_ID='101' and CHANNEL_TYPE!='PUSH' then 1 else 0 end) as "SOAPAll",
+        sum(case when sent_date is not null and WCS_CONTENT_TYPE_ID='101' and CHANNEL_TYPE!='PUSH' then 1 else 0 end) as "SOAPSent",
+        sum(case when WCS_CONTENT_TYPE_ID='102' and CHANNEL_TYPE!='PUSH' then 1 else 0 end) as "DBAll",
+        sum(case when sent_date is not null and WCS_CONTENT_TYPE_ID='102' and CHANNEL_TYPE!='PUSH' then 1 else 0 end) as "DBSent",
+        sum(case when WCS_CONTENT_TYPE_ID='103' and CHANNEL_TYPE!='PUSH' then 1 else 0 end) as "FileAll",
+        sum(case when sent_date is not null and WCS_CONTENT_TYPE_ID='103' and CHANNEL_TYPE!='PUSH' then 1 else 0 end) as "FileSent",
+        sum(case when CHANNEL_TYPE='PUSH' and (error_description!='PUSH not active' or error_description is null)  then 1 else 0 end) as "PushAll",
+        sum(case when CHANNEL_TYPE='PUSH' and sent_date is not null then 1 else 0 end) as "PushSent"
+        from cms_hcb.out_sms_arch_v
+        where CREATE_DATE>=TRUNC(SYSDATE)
+        group by to_char(create_date,'DD.MM.YYYY')
+        )
+    sub-metrics:
+        round: soappercent
+        Round: dbpercent
+        ROund: filepercent
+        ROUnd: pushpercent
+        ROUNd: generalpercent
+    interval: 5m
+
+- statistics_percent_day_oper:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+     SELECT
+     round((100/("Teleall"/"Telesent")),2) as "telepercent",
+     Round((100/("MtsAll"/"MtsSent")),2) as "mtspercent",
+     ROund((100/("BeelineAll"/"BeelineSent")),2) as "beelinepercent",
+     ROUnd((100/("MegafonAll"/"MegafonSent")),2) as "megafonpercent",
+     ROUNd(((100/("Teleall"/"Telesent"))+(100/("MtsAll"/"MtsSent"))+(100/("BeelineAll"/"BeelineSent"))+(100/("MegafonAll"/"MegafonSent")))/4, 2) as "generalpercent"
+     FROM(
+     select to_char(create_date,'DD.MM.YYYY'),
+     sum(case when ACTUAL_MODULE_NAME='tele2-smpp' then 1 else 0 end) as "Teleall",
+     sum(case when ACTUAL_MODULE_NAME='tele2-smpp' and sent_date is not null then 1 else 0 end) as "Telesent",
+     Sum(case when ACTUAL_MODULE_NAME='mts-smpp' then 1 else 0 end) as "MtsAll",
+     Sum(case when ACTUAL_MODULE_NAME='mts-smpp' and sent_date is not null  then 1 else 0 end) as "MtsSent",
+     SUm(case when ACTUAL_MODULE_NAME='beeline-smpp' then 1 else 0 end) as "BeelineAll",
+     SUm(case when ACTUAL_MODULE_NAME='beeline-smpp' and sent_date is not null then 1 else 0 end) as "BeelineSent",
+     SUM(case when ACTUAL_MODULE_NAME='megafon-smpp' then 1 else 0 end) as "MegafonAll",
+     SUM(case when ACTUAL_MODULE_NAME='megafon-smpp' and sent_date is not null then 1 else 0 end) as "MegafonSent"
+     from cms_hcb.out_sms_arch_v
+     where CREATE_DATE>=TRUNC(SYSDATE)
+     group by to_char(create_date,'DD.MM.YYYY')
+     )
+    sub-metrics:
+        round: telepercent
+        Round: mtspercent
+        ROund: beelinepercent
+        ROUnd: megafonpercent
+        ROUNd: generalpercent
+    interval: 1h
+
+#- smsgate_statistics_new:
+    # Name of the driver to use.
+#    driver: oracle
+
+    # Connection information.
+#    connection:
+#        host: hostname
+#        port: 1521
+#        user: username
+#        password: password
+#        database: servicename
+    #Запрос к БД
+#    sql: >
+#     select
+#     SUM(case when channel_type='SMS' and delivered_date is not null then 1 else 0 end) as "smsdel",
+#     SUm(case when channel_type='SMS' and delivered_date is null then 1 else 0 end) as "smsnotdel",
+#     Sum(case when channel_type='PUSH' and delivered_date is not null then 1 else 0 end) as "pushdel",
+#     sum(case when channel_type='PUSH' and error_description='PUSH answer error' then 1 else 0 end) as "pushserverr",
+#     suM(case when channel_type='PUSH' and error_description in ('Abonent_Is_In_Black_list', 'Error_address_blocked', 'Message_expired', 'Can_Not_Replace_All_Params') then 1 else 0 end) as "pushothererr"
+#     from cms_hcb.out_sms_arch_v
+#     where create_date>=trunc(sysdate)
+#    sub-metrics:
+#        SUM: smsdel
+#        SUm: smsnotdel
+#        Sum: pushdel
+#        sum: pushserverr
+#        suM: pushothererr
+#    interval: 120s
+
+- smsgate_incorrect_temps:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+     SELECT count(*) as "incorrecttemps"
+     FROM cms_hcb.hcb_templates q
+     WHERE REGEXP_LIKE (q.text_tr, '[а-яА-Я]')and (q.lang='TR' or q.lang='TR')
+     having count(*)>1
+    sub-metrics:
+        count: incorrecttemps
+    interval: 2h
+
+- smsgate_push_delivered_undelivered:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT
+        SUM ("pushdel") as "pushdelivered",
+        SUM ("pusherr"+"pushmiss") as "pushnotdelivered"
+        from
+        (select
+        sum(case when channel_type='PUSH' and delivered_date is not null then 1 else 0 end) as "pushdel",
+        sum(case when channel_type='PUSH' and error_description in ('PUSH answer error', 'Abonent_Is_In_Black_list', 'Error_address_blocked', 'Message_expired', 'Can_Not_Replace_All_Params') then 1 else 0 end) as "pusherr",
+        sum(case when channel_type='PUSH' and (error_description is null and delivered_date is null) then 1 else 0 end) as "pushmiss"
+        from cms_hcb.out_sms_arch_v
+        where create_date>=trunc(sysdate)
+        union
+        select
+        sum(case when channel_type='PUSH' and delivered_date is not null then 1 else 0 end) as "pushdel",
+        sum(case when channel_type='PUSH' and error_description in ('PUSH answer error', 'Abonent_Is_In_Black_list', 'Error_address_blocked', 'Message_expired', 'Can_Not_Replace_All_Params') then 1 else 0 end) as "pusherr",
+        sum(case when channel_type='PUSH' and (error_description is null and delivered_date is null) then 1 else 0 end) as "pushmiss"
+        from cms_hcb.out_sms_v
+        where create_date>=trunc(sysdate))
+    sub-metrics:
+        SUM: pushdelivered
+        sum: pushnotdelivered
+    interval: 200s
+
+- smsgate_osberr:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+       SELECT
+       count(*) as "osberr"
+       FROM cms_hcb.out_sms_arch_v
+       where create_date>=TRUNC(SYSDATE)
+       and ERROR_DESCRIPTION='PUSH answer error'
+    sub-metrics:
+        count: osberr
+    interval: 120s
+
+- android_mb:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        SELECT
+        sum(case when OS_TYPE='1' and application_type='2' and (RECEIVED_DATE is not null or RECEIVED_TO_DEVICE_DATE is not null) then 1 else 0 end) as "mbandroidreceived",
+        Sum(case when OS_TYPE='1' and application_type='2' and RECEIVED_DATE  is null and RECEIVED_TO_DEVICE_DATE is null then 1 else 0 end) as "mbandroidnotreceived"
+        FROM MESSAGES
+        where CREATE_DATE>=trunc(sysdate)
+        order by create_date desc
+        ) where ROWNUM='1'
+    sub-metrics:
+        sum: mbandroidreceived
+        Sum: mbandroidnotreceived
+    interval: 30m
+
+- android_mk:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        SELECT
+        sum(case when OS_TYPE='1' and application_type='1' and (RECEIVED_DATE is not null or RECEIVED_TO_DEVICE_DATE is not null) then 1 else 0 end) as "mkandroidreceived",
+        Sum(case when OS_TYPE='1' and application_type='1' and RECEIVED_DATE is null and RECEIVED_TO_DEVICE_DATE is null then 1 else 0 end) as "mkandroidnotreceived"
+        FROM MESSAGES
+        where CREATE_DATE>=trunc(sysdate)
+        order by create_date desc
+        ) where ROWNUM='1'
+    sub-metrics:
+        sum: mkandroidreceived
+        Sum: mkandroidnotreceived
+    interval: 30m
+
+- ios_mb:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        SELECT
+        sum(case when OS_TYPE='2' and application_type='2' and RECEIVED_DATE is not null then 1 else 0 end) as "mbiosreceived",
+        Sum(case when OS_TYPE='2' and application_type='2' and RECEIVED_DATE is null then 1 else 0 end) as "mbiosnotreceived"
+        FROM MESSAGES
+        where CREATE_DATE>=trunc(sysdate)
+        order by create_date desc
+        ) where ROWNUM='1'
+    sub-metrics:
+        sum: mbiosreceived
+        Sum: mbiosnotreceived
+    interval: 30m
+
+- ios_mk:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        SELECT
+        sum(case when application_type='1' and RECEIVED_DATE is not null and (OS_TYPE='2' or OS_TYPE='5') then 1 else 0 end) as "mkiosreceived",
+        Sum(case when application_type='1' and RECEIVED_DATE is null and (OS_TYPE='2' or OS_TYPE='5') then 1 else 0 end) as "mkiosnotreceived"
+        FROM MESSAGES
+        where CREATE_DATE>=trunc(sysdate)
+        order by create_date desc
+        ) where ROWNUM='1'
+    sub-metrics:
+        sum: mkiosreceived
+        Sum: mkiosnotreceived
+    interval: 30m
+
+#- session_smsgt:
+    # Name of the driver to use.
+#    driver: oracle
+
+    # Connection information.
+#    connection:
+#        host: hostname
+#        port: 1521
+#        user: username
+#        password: password
+#        database: servicename
+    #Запрос к БД
+#    sql: >
+#        select osuser as "osuser", status as "status", count(*) as "count"
+#        from v$session
+#        group by osuser, status
+#    data-field: count
+#    interval: 1m
+
+#- blocking_session_status_smsgt:
+    # Name of the driver to use.
+#    driver: oracle
+
+    # Connection information.
+#    connection:
+#        host: hostname
+#        port: 1521
+#        user: username
+#        password: password
+#        database: servicename
+    #Запрос к БД
+#    sql: >
+#        select
+#        (case when blocking_session_status = 'VALID' then 'VALID' when blocking_session_status = 'NO HOLDER' then 'NOHOLDER' when blocking_session_status = 'GLOBAL' then 'GLOBAL' when blocking_session_status = 'NOT IN WAIT' then 'NOTINWAIT' when blocking_session_status = 'UNKNOWN' then 'UNKNOWN1' else to_char(blocking_session_status) end) as status,
+#        count(*) as count
+#        from v$session
+#        GROUP BY blocking_session_status
+#    data-field: count
+#    interval: 1m
+
+#- deadlock_smsgt:
+    # Name of the driver to use.
+#    driver: oracle
+
+    # Connection information.
+#    connection:
+#        host: hostname
+#        port: 1521
+#        user: username
+#        password: password
+#        database: servicename
+    #Запрос к БД
+#    sql: >
+#        SELECT count(*) as "kolvo"
+#        FROM v$lock
+#        where request!='0'
+#    data-field: count
+#    interval: 1m
+
+#- session_push:
+    # Name of the driver to use.
+#    driver: oracle
+
+    # Connection information.
+#    connection:
+#        host: hostname
+#        port: 1521
+#        user: username
+#        password: password
+#        database: servicename
+    #Запрос к БД
+#    sql: >
+#        select osuser as "osuser", status as "status", count(*) as "count"
+#        from v$session
+#        group by osuser, status
+#    data-field: count
+#    interval: 1m
+
+#- blocking_session_status_push:
+    # Name of the driver to use.
+#    driver: oracle
+
+    # Connection information.
+#    connection:
+#        host: hostname
+#        port: 1521
+#        user: username
+#        password: password
+#        database: servicename
+    #Запрос к БД
+#    sql: >
+#        select
+#        (case when blocking_session_status = 'VALID' then 'VALID' when blocking_session_status = 'NO HOLDER' then 'NOHOLDER' when blocking_session_status = 'GLOBAL' then 'GLOBAL' when blocking_session_status = 'NOT IN WAIT' then 'NOTINWAIT' when blocking_session_status = 'UNKNOWN' then 'UNKNOWN1' else to_char(blocking_session_status) end) as status,
+#        count(*) as count
+#        from v$session
+#        GROUP BY blocking_session_status
+#    data-field: count
+#    interval: 1m
+
+#- deadlock_push:
+    # Name of the driver to use.
+#    driver: oracle
+
+    # Connection information.
+#    connection:
+#        host: hostname
+#        port: 1521
+#        user: username
+#        password: password
+#        database: servicename
+    #Запрос к БД
+#    sql: >
+#        SELECT count(*) as "kolvo"
+#        FROM v$lock
+#        where request!='0'
+#    data-field: count
+#    interval: 1m
+
+- smsgate_out_sms_sent_qq:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        SELECT
+        sum(case when ACTUAL_MODULE_NAME='tele2-smpp' and sent_date is not null then 1 else 0 end) as "tele2-smpp",
+        Sum(case when ACTUAL_MODULE_NAME='mts-smpp' and sent_date is not null  then 1 else 0 end) as "mts-smpp",
+        SUm(case when ACTUAL_MODULE_NAME='beeline-smpp' and sent_date is not null then 1 else 0 end) as "beeline-smpp",
+        SUM(case when ACTUAL_MODULE_NAME='megafon-smpp' and sent_date is not null then 1 else 0 end) as "megafon-smpp",
+        sUM(case when ACTUAL_MODULE_NAME='smstraffic-smpp' and sent_date is not null then 1 else 0 end) as "smstraffic-smpp",
+        suM(case when ACTUAL_MODULE_NAME='smsc-smpp' and sent_date is not null then 1 else 0 end) as "smsc-smpp"
+        FROM cms_hcb.out_sms_v
+        where sent_date>=trunc(sysdate)
+        group by (to_char(sent_date,'HH24')*'6'+ floor(to_char(sent_date,'MI')/'10'))
+        order by (to_char(sent_date,'HH24')*'6'+ floor(to_char(sent_date,'MI')/'10')) desc
+        ) where ROWNUM='1'
+    sub-metrics:
+        sum: tele2-smpp
+        Sum: mts-smpp
+        SUm: beeline-smpp
+        SUM: megafon-smpp
+        sUM: smstraffic-smpp
+        suM: smsc-smpp
+    interval: 600s
+
+- smsgate_out_sms_smsc:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        SELECT
+        sum(case when ACTUAL_MODULE_NAME='smsc-smpp' and sent_date is not null then 1 else 0 end) as "smsc-smpp"
+        FROM cms_hcb.out_sms_v
+        where create_date>=trunc(sysdate)
+        group by (to_char(create_date,'HH24')*'6'+ floor(to_char(create_date,'MI')/'10'))
+        order by (to_char(create_date,'HH24')*'6'+ floor(to_char(create_date,'MI')/'10')) desc
+        ) where ROWNUM='1'
+    sub-metrics:
+        sum: smsc-smpp
+    interval: 60s
+
+- smsgate_out_sms_notsuccess_smsc:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        SELECT
+        sum(case when ACTUAL_MODULE_NAME='smsc-smpp' and sent_date is null then 1 else 0 end) as "smsc-smpp"
+        FROM cms_hcb.out_sms_v
+        where create_date>=trunc(sysdate)
+        group by (to_char(create_date,'HH24')*'6'+ floor(to_char(create_date,'MI')/'10'))
+        order by (to_char(create_date,'HH24')*'6'+ floor(to_char(create_date,'MI')/'10')) desc
+        ) where ROWNUM='1'
+    sub-metrics:
+        sum: smsc-smpp
+    interval: 60s
+
+- smsgate_out_sms_notdelivered_smsc:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        SELECT
+        sum(case when ACTUAL_MODULE_NAME='smsc-smpp' and delivered_date is null then 1 else 0 end) as "smsc-smpp"
+        FROM cms_hcb.out_sms_v
+        where create_date>=trunc(sysdate)
+        group by (to_char(create_date,'HH24')*'6'+ floor(to_char(create_date,'MI')/'10'))
+        order by (to_char(create_date,'HH24')*'6'+ floor(to_char(create_date,'MI')/'10')) desc
+        ) where ROWNUM='1'
+    sub-metrics:
+        sum: smsc-smpp
+    interval: 60s
+
+- smsgate_out_sms_delivery_smsc:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        SELECT
+        sum(case when ACTUAL_MODULE_NAME='smsc-smpp' and delivered_date is not null then 1 else 0 end) as "smsc-smpp"
+        FROM cms_hcb.out_sms_v
+        where create_date>=trunc(sysdate)
+        group by (to_char(create_date,'HH24')*'6'+ floor(to_char(create_date,'MI')/'10'))
+        order by (to_char(create_date,'HH24')*'6'+ floor(to_char(create_date,'MI')/'10')) desc
+        ) where ROWNUM='1'
+    sub-metrics:
+        sum: smsc-smpp
+    interval: 60s
+
+- smsgate_wast_operator_smsc:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT sum(trunc(OPERATOR_PRICE,2)) as "smsc" FROM cms_hcb.out_sms_arch_v
+        where create_date>=trunc(sysdate) and OPERATOR_PRICE is not null and ACTUAL_MODULE_NAME='smsc-smpp'
+    sub-metrics:
+        sum: smsc
+    interval: 60s
+
+- smsgate_time_sent_smsc:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        select
+        count(case when diff1 <= 1 then 1 end) as "sec1",
+        Count(case when (diff1 <= 10 and diff1 > 1) then 1 end) as "sec10",
+        COunt(case when (diff1 <= 30 and diff1 > 10) then 1 end) as "sec30",
+        COUnt(case when (diff1 <= 60 and diff1 > 30) then 1 end) as "min1",
+        COUNt(case when (diff1 <= 180 and diff1 > 60) then 1 end) as "min3",
+        COUNT(case when (diff1 <= 600 and diff1 > 180) then 1 end) as "min10",
+        cOunt(case when diff1 > 600 then 1 end) as "min10plus"
+        from (
+        select (extract(day from diff)*86400 + (extract(hour from diff))*3600 + extract(minute from diff)*60 + extract(second from diff)) as diff1
+        from (
+        select cast(SENT_DATE as TIMESTAMP)-cast(CREATE_DATE as TIMESTAMP) as diff
+        from cms_hcb.out_sms_v
+        where create_date>=trunc(sysdate) and SENT_DATE is not null and ACTUAL_MODULE_NAME='smsc-smpp'
+        ORDER BY create_date desc
+        )
+        )
+        ) where ROWNUM='1'
+    sub-metrics:
+        count: sec1
+        Count: sec10
+        COunt: sec30
+        COUnt: min1
+        COUNt: min3
+        COUNT: min10
+        cOunt: min10plus
+    interval: 70s
+
+- smsgate_time_delivered_smsc:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        select
+        count(case when diff1 <= 1 then 1 end) as "sec1",
+        Count(case when (diff1 <= 10 and diff1 > 1) then 1 end) as "sec10",
+        COunt(case when (diff1 <= 30 and diff1 > 10) then 1 end) as "sec30",
+        COUnt(case when (diff1 <= 60 and diff1 > 30) then 1 end) as "min1",
+        COUNt(case when (diff1 <= 180 and diff1 > 60) then 1 end) as "min3",
+        COUNT(case when (diff1 <= 600 and diff1 > 180) then 1 end) as "min10",
+        cOunt(case when diff1 > 600 then 1 end) as "min10plus"
+        from (
+        select (extract(day from diff)*86400 + (extract(hour from diff))*3600 + extract(minute from diff)*60 + extract(second from diff)) as diff1
+        from (
+        select cast(DELIVERED_DATE as TIMESTAMP)-cast(SENT_DATE as TIMESTAMP) as diff
+        from cms_hcb.out_sms_v
+        where create_date>=trunc(sysdate) and DELIVERED_DATE is not null and ACTUAL_MODULE_NAME='smsc-smpp'
+        ORDER BY create_date desc
+        )
+        )
+        ) where ROWNUM='1'
+    sub-metrics:
+        count: sec1
+        Count: sec10
+        COunt: sec30
+        COUnt: min1
+        COUNt: min3
+        COUNT: min10
+        cOunt: min10plus
+    interval: 70s
+
+- smsgate_omnipasscoder_sent:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        select * from(
+        select
+        sum(case when source_system_id='97' then 1 else 0 end) as "pcoss",
+        suM(case when source_system_id='127' then 1 else 0 end) as "pcufo",
+        sUM(case when source_system_id='64' then 1 else 0 end) as "pcdc",
+        SUM(case when source_system_id='72' then 1 else 0 end) as "pchomer",
+        sUm(case when source_system_id='87' then 1 else 0 end) as "pcmarket",
+        Sum(case when source_system_id='94' then 1 else 0 end) as "pcmycredit",
+        SUm(case when source_system_id='128' then 1 else 0 end) as "pcvoicebot",
+        SuM(case when source_system_id='35' then 1 else 0 end) as "other"
+        from cms_hcb.out_sms_arch_v
+        where sent_date>=trunc(sysdate)
+        group by (to_char(sent_date,'HH24')*'6'+ floor(to_char(sent_date,'MI')/'10'))
+        order by (to_char(sent_date,'HH24')*'6'+ floor(to_char(sent_date,'MI')/'10')) desc
+        ) where ROWNUM='1'
+    sub-metrics:
+        sum: pcoss
+        suM: pcufo
+        sUM: pcdc
+        SUM: pchomer
+        sUm: pcmarket
+        Sum: pcmycredit
+        SUm: pcvoicebot
+        SuM: other
+    interval: 600s
+
+- smsgate_sms_in:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+       SELECT
+       sum("mts") as "mts",
+       Sum("beeline") as "beeline",
+       SUm("megafon") as "megafon",
+       SUM("tele2") as "tele2",
+       sUM("smstraffic") as "smstraffic",
+       suM("smsc") as "smsc"
+       from(
+       select 
+       sum(case when module_name='mts-smpp' then 1 else 0 end) as "mts",
+       sum(case when module_name='beeline-smpp' then 1 else 0 end) as "beeline",
+       sum(case when module_name='megafon-smpp' then 1 else 0 end) as "megafon",
+       sum(case when module_name='tele2-smpp' then 1 else 0 end) as "tele2",
+       sum(case when module_name='smstraffic-smpp' then 1 else 0 end) as "smstraffic",
+       sum(case when module_name='smsc-smpp' then 1 else 0 end) as "smsc"
+       FROM cms_hcb.in_sms_arch
+       where CREATE_DATE>=TRUNC(SYSDATE)
+       union all
+       select 
+       sum(case when module_name='mts-smpp' then 1 else 0 end) as "mts",
+       sum(case when module_name='beeline-smpp' then 1 else 0 end) as "beeline",
+       sum(case when module_name='megafon-smpp' then 1 else 0 end) as "megafon",
+       sum(case when module_name='tele2-smpp' then 1 else 0 end) as "tele2",
+       sum(case when module_name='smstraffic-smpp' then 1 else 0 end) as "smstraffic",
+       sum(case when module_name='smsc-smpp' then 1 else 0 end) as "smsc"
+       FROM cms_hcb.in_sms
+       where CREATE_DATE>=TRUNC(SYSDATE))
+    sub-metrics:
+        sum: mts
+        Sum: beeline
+        SUm: megafon
+        SUM: tele2
+        sUM: smstraffic
+        suM: smsc
+    interval: 300s
+
+- push_delay_send:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        select
+        count(case when diff1 <= 1 then 1 end) as "sec1",
+        Count(case when (diff1 <= 10 and diff1 > 1) then 1 end) as "sec10",
+        COunt(case when (diff1 <= 30 and diff1 > 10) then 1 end) as "sec30",
+        COUnt(case when (diff1 <= 60 and diff1 > 30) then 1 end) as "min1",
+        COUNt(case when (diff1 <= 180 and diff1 > 60) then 1 end) as "min3",
+        COUNT(case when (diff1 <= 600 and diff1 > 180) then 1 end) as "min10",
+        cOunt(case when diff1 > 600 then 1 end) as "min10plus"
+        from (
+        select (extract(day from diff)*86400 + (extract(hour from diff))*3600 + extract(minute from diff)*60 + extract(second from diff)) as diff1
+        from (
+        select cast(grab as TIMESTAMP)-cast(send as TIMESTAMP) as diff
+        from (
+        SELECT send_date as send,grab_date as grab
+        from plans
+        where send_date>=trunc(sysdate,'mi') - INTERVAL '1' MINUTE
+        )
+        )
+        )
+    sub-metrics:
+        count: sec1
+        Count: sec10
+        COunt: sec30
+        COUnt: min1
+        COUNt: min3
+        COUNT: min10
+        cOunt: min10plus
+    interval: 70s
+
+- smsgate_otp_push_sent:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        select
+        Count(case when diff1 <= 10 then 1 end) as "in10sec",
+        COunt(case when (diff1 < 30 and diff1 > 10) then 1 end) as "in30sec",
+        COUnt(case when diff1 > 30 then 1 end) as "over30sec"
+        from (
+        select (extract(day from diff)*86400 + (extract(hour from diff))*3600 + extract(minute from diff)*60 + extract(second from diff)) as diff1
+        from (
+        select cast(SENT_DATE as TIMESTAMP)-cast(CREATE_DATE as TIMESTAMP) as diff
+        from cms_hcb.out_sms_arch_v os
+        join cms_hcb.hcb_templates ht on ht.service_id=os.SERVICE_ID
+        where create_date>=trunc(sysdate)
+        and channel_type='PUSH'
+        and ht.template_group_id='115'
+        and sent_date is not null
+        ORDER BY create_date desc
+        )
+        )
+        ) where ROWNUM='1'
+    sub-metrics:
+        Count: in10sec
+        COunt: in30sec
+        COUnt: over30sec
+    interval: 70s
+
+- smsgate_otp_push_del:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT * FROM(
+        select
+        Count(case when diff1 <= 10 then 1 end) as "in10sec",
+        COunt(case when (diff1 < 30 and diff1 > 10) then 1 end) as "in30sec",
+        COUnt(case when diff1 > 30 then 1 end) as "over30sec"
+        from (
+        select (extract(day from diff)*86400 + (extract(hour from diff))*3600 + extract(minute from diff)*60 + extract(second from diff)) as diff1
+        from (
+        select cast(DELIVERED_DATE as TIMESTAMP)-cast(CREATE_DATE as TIMESTAMP) as diff
+        from cms_hcb.out_sms_arch_v os
+        join cms_hcb.hcb_templates ht on ht.service_id=os.SERVICE_ID
+        where create_date>=trunc(sysdate)
+        and channel_type='PUSH'
+        and ht.template_group_id='115'
+        and sent_date is not null
+        ORDER BY create_date desc
+        )
+        )
+        ) where ROWNUM='1'
+
+    sub-metrics:
+        Count: in10sec
+        COunt: in30sec
+        COUnt: over30sec
+    interval: 70s
+
+- smsgate_otp_push_stat:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        select
+        sum(case when channel_type='PUSH' and error_description is null then 1 else 0 end) as "otppushsent",
+        Sum(case when channel_type='PUSH' and error_description is null and delivered_date is not null then 1 else 0 end) as "otppushdel",
+        SUm(case when channel_type='SMS' and error_description is null then 1 else 0 end) as "otpsmssent",
+        SUM(case when channel_type='SMS' and error_description is null and delivered_date is not null then 1 else 0 end) as "otpsmsdel",
+        sUM(case when error_description!='PUSH not active' and sent_date is null then 1 else 0 end) as "errors"
+        from cms_hcb.out_sms_arch_v os
+        join cms_hcb.hcb_templates ht on ht.service_id=os.SERVICE_ID
+        where create_date>=trunc(sysdate)
+        and ht.template_group_id='115'
+        ORDER BY create_date desc
+    sub-metrics:
+        sum: otppushsent
+        Sum: otppushdel
+        SUm: otpsmssent
+        SUM: otpsmsdel
+        sUM: errors
+    interval: 60s
+
+- failed_encoding_queue:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT count(*) as "failed_queue"
+        FROM CMS_HCB.queue_out_messages_tab
+        where start_time>=trunc(sysdate+1)
+        and (text like '%í%'
+        or text like '%á%'
+        or text like '%ó%')
+    sub-metrics:
+        count: failed_queue
+    interval: 200s
+
+- failed_encoding_deferred:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT count(*) as "failed_deferred"
+        FROM cms_hcb.wcs_deferred_storage
+        where defer_date>=trunc(sysdate+1)
+        and message_data like '%&#%'
+    sub-metrics:
+        count: failed_deferred
+    interval: 200s
+
+- file_process_status_failed:
+    # Name of the driver to use.
+    driver: oracle
+
+    # Connection information.
+    connection:
+        host: hostname
+        port: 1521
+        user: username
+        password: password
+        database: servicename
+    #Запрос к БД
+    sql: >
+        SELECT
+        count(*) as "process_failed"
+        FROM CMS_HCB.hcb_file_register
+        where process_status='3'
+        and process_date>=trunc(sysdate)
+    sub-metrics:
+        count: process_failed
+    interval: 60s

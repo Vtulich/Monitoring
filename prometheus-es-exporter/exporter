@@ -1,0 +1,155 @@
+[DEFAULT]
+QueryIntervalSecs = 60
+QueryTimeoutSecs = 30
+
+[query_app_percentiles]
+QueryIndices = gl-network-f5_*
+QueryJson = {
+      "size": 0,
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "range": {
+                "timestamp": {
+                  "gte": "now-1m",
+                  "lt": "now"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "aggs": {
+        "service": {
+          "filters": {
+            "filters": {
+                "push": {"term": {"dns_name": "hostpush.domain.ru"}},
+                "sms": {"term": {"dns_name": "hostsms.domain.ru"}}
+                 }
+                },
+                "aggs": {
+                  "type": {
+                    "filter": {"term": {"f5_type": "RESPONSE"}},
+                  "aggs": {
+                    "resp": {
+                       "percentiles": {"field": "response_msecs"}
+              }
+            }
+          }
+        }
+      }
+     }
+    }
+[query_app_trafic]
+QueryIndices = gl-network-f5_*
+QueryJson = {
+      "size": 0,
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "range": {
+                "timestamp": {
+                  "gte": "now-1m",
+                  "lt": "now"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "aggs": {
+        "dnsname": {
+          "filter": {"term": {"dns_name": "hostsms.domain.ru"}},
+          "aggs": {
+            "nodeip": {
+              "terms": {"field": "node_ip"},
+              "aggs": {
+                "nodeport": {
+                  "terms": {"field": "node_port"}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+[query_resp_time]
+QueryIndices = gl-network-f5_*
+QueryJson = {
+      "size": 0,
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "range": {
+                "timestamp": {
+                  "gte": "now-1m",
+                  "lt": "now"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "aggs": {
+        "group_filter": {
+          "filters": {
+            "filters": {
+              "push_time_resp": {"term": {"dns_name": "hostpush.domain.ru"}},
+              "sms_time_resp": {"term": {"dns_name": "hostsms.domain.ru"}}
+            }
+           },
+          "aggs": {
+            "type": {
+               "filter": {"term": {"f5_type": "RESPONSE"}},
+                 "aggs": {
+                   "nodeport": {
+                      "terms": {"field": "node_port"},
+                        "aggs": {
+                          "resp": {
+                            "stats": {"field": "response_msecs"}
+               }
+              }
+             }
+            }
+           }
+          }
+         }
+        }
+       }
+[query_app_stat_code]
+QueryIndices = gl-network-f5_*
+QueryJson = {
+      "size": 0,
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "range": {
+                "timestamp": {
+                  "gte": "now-1m",
+                  "lt": "now"
+                }
+              }
+            }
+          ]
+        }
+      },
+          "aggs": {
+        "group_filter": {
+          "filters": {
+            "filters": {
+              "sms": {"term": {"dns_name": "hostsms.domain.ru"}},
+              "push": {"term": {"dns_name": "hostpush.domain.ru"}}
+            }
+           },
+                 "aggs": {
+                   "statcode": {
+                      "terms": {"field": "http_statcode"}
+              }
+            }
+          }
+        }
+      }

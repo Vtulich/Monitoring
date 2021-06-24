@@ -1,0 +1,49 @@
+modules:
+  push:
+    prober: http
+    timeout: 5s
+    http:
+      method: POST
+      headers:
+        Authorization: Basic basicauthorized
+        Content-Type: application/json
+  smsgate:
+    prober: http
+    timeout: 5s
+    http:
+      method: POST
+      headers:
+        Authorization: Basic basicauthorized
+        Content-Type: text/xml
+      body: |
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"><soapenv:Header/><soapenv:Body><ns2:ConsumeOutMessageRequest xmlns:ns2="http://www.mfms.ru/homcre/client2/out-message-service"><systemId>FAIK</systemId><consumeOutMessageArg><messageId>$messageId</messageId><cuid>1</cuid><outMessageTypeId>FAIK</outMessageTypeId><subject></subject><address>77777777777</address><priority>realtime</priority><outMessageTemplate><languageId>ru</languageId><outMessageTemplateParam><key>PASS</key><value>Тест</value></outMessageTemplateParam></outMessageTemplate></consumeOutMessageArg></ns2:ConsumeOutMessageRequest></soapenv:Body></soapenv:Envelope>
+  smsgate_test:
+    prober: http
+    timeout: 5s
+    http:
+      method: POST
+      headers:
+        Authorization: Basic basicauthorized
+        Content-Type: text/xml
+      body: |
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"><soapenv:Header/><soapenv:Body><ns2:ConsumeOutMessageRequest xmlns:ns2="http://www.mfms.ru/homcre/client2/out-message-service"><systemId>FAIK</systemId><consumeOutMessageArg><messageId>$messageId</messageId><cuid>1</cuid><outMessageTypeId>FAIK</outMessageTypeId><subject></subject><address>77777777777</address><priority>realtime</priority><outMessageTemplate><languageId>ru</languageId><outMessageTemplateParam><key>PASS</key><value>Тест</value></outMessageTemplateParam></outMessageTemplate></consumeOutMessageArg></ns2:ConsumeOutMessageRequest></soapenv:Body></soapenv:Envelope>
+  smsgate_load1:
+    prober: http
+    timeout: 5s
+    http:
+      method: POST
+      headers:
+        Authorization: Basic basicauthorized
+        Content-Type: text/xml
+      body: |
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"><soapenv:Header/><soapenv:Body><ns2:ConsumeOutMessageRequest xmlns:ns2="http://www.mfms.ru/homcre/client2/out-message-service"><systemId>FAIK</systemId><consumeOutMessageArg><messageId>$messageId</messageId><cuid>1</cuid><outMessageTypeId>FAIK</outMessageTypeId><subject></subject><address>77777777777</address><priority>realtime</priority><outMessageTemplate><languageId>ru</languageId><outMessageTemplateParam><key>PASS</key><value>Тест</value></outMessageTemplateParam></outMessageTemplate></consumeOutMessageArg></ns2:ConsumeOutMessageRequest></soapenv:Body></soapenv:Envelope>
+  smsgate_load2:
+    prober: http
+    timeout: 5s
+    http:
+      method: POST
+      headers:
+        Authorization: Basic basicauthorized
+        Content-Type: text/xml
+      body: |
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"><soapenv:Header/><soapenv:Body><ns2:ConsumeOutMessageRequest xmlns:ns2="http://www.mfms.ru/homcre/client2/out-message-service"><systemId>FAIK</systemId><consumeOutMessageArg><messageId>$messageId</messageId><cuid>1</cuid><outMessageTypeId>FAIK</outMessageTypeId><subject></subject><address>77777777777</address><priority>realtime</priority><outMessageTemplate><languageId>ru</languageId><outMessageTemplateParam><key>PASS</key><value>Тест</value></outMessageTemplateParam></outMessageTemplate></consumeOutMessageArg></ns2:ConsumeOutMessageRequest></soapenv:Body></soapenv:Envelope>

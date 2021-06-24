@@ -1,0 +1,16 @@
+#!/bin/bash
+var1=`/opt/omq/mq/bin/imqcmd list dst -b localhost:7676 -u admin -passfile /opt/omq/mq/bin/imq.pass|grep -w hcb_beeline_smpp|awk {'print $8'}`
+var10=`/opt/omq/mq/bin/imqcmd list dst -b localhost:7676 -u admin -passfile /opt/omq/mq/bin/imq.pass|grep -w hcb_megafon_smpp|awk {'print $8'}`
+var11=`/opt/omq/mq/bin/imqcmd list dst -b localhost:7676 -u admin -passfile /opt/omq/mq/bin/imq.pass|grep -w hcb_mts_smpp|awk {'print $8'}`
+var27=`/opt/omq/mq/bin/imqcmd list dst -b localhost:7676 -u admin -passfile /opt/omq/mq/bin/imq.pass|grep -w hcb_tele2_smpp|awk {'print $8'}`
+var28=`/opt/omq/mq/bin/imqcmd list dst -b localhost:7676 -u admin -passfile /opt/omq/mq/bin/imq.pass|grep -w hcb_smstraffic_smpp|awk {'print $8'}`
+var29=`/opt/omq/mq/bin/imqcmd list dst -b localhost:7676 -u admin -passfile /opt/omq/mq/bin/imq.pass|grep -w hcb_smsc_smpp|awk {'print $8'}`
+var30=`grep -c 'HTTP\/1.0\" 503 ' /var/log/tomcat/localhost_access_log.$(date +"%Y-%m-%d").txt`
+
+echo queue_hcb_beeline_smpp $var1
+echo queue_hcb_megafon_smpp $var10
+echo queue_hcb_mts_smpp $var11
+echo queue_hcb_tele2_smpp $var27
+echo queue_hcb_smstrafic_smpp $var28
+echo queue_hcb_smsc_smpp $var29
+echo tomcat_503 $var30

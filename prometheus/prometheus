@@ -1,0 +1,288 @@
+# Sample config for Prometheus.
+
+global:
+  scrape_interval:     60s # By default, scrape targets every 15 seconds.
+  evaluation_interval: 60s # By default, scrape targets every 15 seconds.
+  # scrape_timeout is set to the global default (10s).
+
+  # Attach these labels to any time series or alerts when communicating with
+  # external systems (federation, remote storage, Alertmanager).
+  external_labels:
+      monitor: 'example'
+
+# Load and evaluate rules in this file every 'evaluation_interval' seconds.
+rule_files:
+  # - "first.rules"
+  # - "second.rules"
+
+# Settings related to the remote write feature.
+remote_write:
+  - url: "http://hostinflux:portinflux/api/v1/prom/write?db=prometheus&u=usernameinflux&p=passwordinflux"
+    queue_config:
+     capacity: 5000
+     max_shards: 50
+     max_samples_per_send: 300
+
+# Settings related to the remote read feature.
+remote_read:
+  - url: "http://hostinflux:portinflux/api/v1/prom/read?db=prometheus&u=usernameinflux&p=passwordinflux"
+  - url: "http://elastic.domain.ru/read"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  - job_name: 'omqsmsgate'
+    metrics_path: /metrics/scriptexporteromq
+    static_configs:
+      - targets: ['host:9661']
+      - targets: ['host:9661']
+  - job_name: 'script-exporter'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['localhost:9661']
+  - job_name: 'exporter-elastic'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['localhost:9206']
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']
+  - job_name: oracledb_exporter_push_transport
+    static_configs:
+      - targets: ['localhost:9161']
+  - job_name: oracledb_exporter_push_subscriber
+    static_configs:
+      - targets: ['localhost:9162']
+  - job_name: oracledb_exporter_push_templates
+    static_configs:
+      - targets: ['localhost:9163']
+  - job_name: oracledb_exporter_smsgate
+    static_configs:
+      - targets: ['localhost:9164']
+  - job_name: nodeexporter
+    static_configs:
+      - targets: ['host:9100']
+  - job_name: nodeexporter_host
+    static_configs:
+      - targets: ['host8:9100']
+  - job_name: nodeexporter_webim
+    static_configs:
+      - targets: ['host52:9100']
+  - job_name: prometheussql
+    static_configs:
+      - targets: ['localhost:8080']
+  - job_name: wmi_host
+    static_configs:
+      - targets: ['host:9182']
+  - job_name: wmi_host
+    static_configs:
+      - targets: ['host:9183']
+  - job_name: wmi_host
+    static_configs:
+      - targets: ['host:9184']
+  - job_name: wmi_host
+    static_configs:
+      - targets: ['host:9182']
+  - job_name: wmi_host
+    static_configs:
+      - targets: ['host:9182']
+  - job_name: wmi_host
+    static_configs:
+      - targets: ['host:9182']
+  - job_name: grok_host
+    static_configs:
+      - targets: ['host:9144']
+  - job_name: grok_host
+    static_configs:
+      - targets: ['host:9144']
+  - job_name: grok_host
+    static_configs:
+      - targets: ['host:9144']
+  - job_name: grok_host
+    static_configs:
+      - targets: ['host:9144']
+  - job_name: grok_host
+    static_configs:
+      - targets: ['host:9144']
+  - job_name: grok_host
+    static_configs:
+      - targets: ['host:9144']
+  - job_name: grok_host
+    static_configs:
+      - targets: ['host:9144']
+      - targets: ['host:9145']
+  - job_name: node_exporter_host
+    static_configs:
+      - targets: ['host:9100']
+  - job_name: node_exporter_host
+    static_configs:
+      - targets: ['host:9100']
+  - job_name: grok_host
+    static_configs:
+      - targets: ['host:9144']
+      - targets: ['host:9145']
+      - targets: ['host:9146']
+      - targets: ['host:9147']
+      - targets: ['host:9148']
+  - job_name: grok_host
+    static_configs:
+      - targets: ['host:9144']
+      - targets: ['host:9145']
+      - targets: ['host:9146']
+      - targets: ['host:9147']
+      - targets: ['host:9148']
+      - targets: ['host:9149']
+      - targets: ['host:9150']
+      - targets: ['host:9151']
+      - targets: ['host:9152']
+      - targets: ['host:9153']
+      - targets: ['host:9154']
+      - targets: ['host:9155']
+  - job_name: grok_host
+    static_configs:
+      - targets: ['host:9144']
+      - targets: ['host:9145']
+      - targets: ['host:9146']
+      - targets: ['host:9147']
+      - targets: ['host:9148']
+      - targets: ['host:9149']
+      - targets: ['host:9150']
+      - targets: ['host:9151']
+      - targets: ['host:9152']
+      - targets: ['host:9153']
+      - targets: ['host:9154']
+      - targets: ['host:9155']
+  - job_name: grok_host
+    static_configs:
+      - targets: ['host:9555']
+
+  - job_name: proc_exp_host
+    static_configs:
+      - targets: ['host:9256']
+  - job_name: proc_exp_host
+    static_configs:
+      - targets: ['host:9256']
+  - job_name: proc_exp_host
+    static_configs:
+      - targets: ['host:9256']
+  - job_name: proc_exp_host
+    static_configs:
+      - targets: ['host:9256']
+  - job_name: proc_exp_host
+    static_configs:
+      - targets: ['host:9256']
+  - job_name: proc_exp_host
+    static_configs:
+      - targets: ['host:9256']
+  - job_name: proc_exp_host
+    static_configs:
+      - targets: ['host:9256']
+
+  - job_name: node_exporter_host
+    static_configs:
+      - targets: ['host:9100']
+  - job_name: node_exporter_host
+    static_configs:
+      - targets: ['host:9100']
+  - job_name: node_exporter_host
+    static_configs:
+      - targets: ['host:9100']
+  - job_name: node_exporter_host
+    static_configs:
+      - targets: ['host:9100']
+  - job_name: node_exporter_host
+    static_configs:
+      - targets: ['host:9100']
+
+  - job_name: node_exporter_host
+    static_configs:
+      - targets: ['host:9100']
+  - job_name: node_exporter_host
+    static_configs:
+      - targets: ['host:9100']
+
+#  - job_name: 'blackbox_push'
+#    metrics_path: /probe
+#    params:
+#      module: [push_post]
+#    static_configs:
+#      - targets:
+#        - http://host.domain.ru:9092/coordinator/v1/api/Private/AddToSubscribers
+#        - http://host.domain.ru:9092/coordinator/v1/api/PublicProxy/GetMessages
+#    relabel_configs:
+#      - source_labels: [__address__]
+#        target_label: __param_target
+#      - source_labels: [__param_target]
+#        target_label: instance
+#      - target_label: __address__
+#        replacement: localhost:9115
+
+  - job_name: 'blackbox_smsgate'
+    metrics_path: /probe
+    params:
+      module: [smsgate]
+    static_configs:
+      - targets:
+        - "http://host:8081/re-hcb-soap"
+        - "http://host:8081/re-hcb-soap"
+        - "http://host:8081/re-hcb-soap"
+        - "http://host:8081/re-hcb-soap"
+        - "http://host:8081/re-hcb-soap"
+        - "http://host:8081/re-hcb-soap"
+        - "http://host:8081/re-hcb-soap"
+        - "http://host:8081/re-hcb-soap"
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: localhost:9115
+
+  - job_name: 'blackbox_smsgate_test'
+    metrics_path: /probe
+    params:
+      module: [smsgate_test]
+    static_configs:
+      - targets:
+        - "http://host:8081/re-hcb-soap"
+        - "http://host:8081/re-hcb-soap"
+        - "http://host:8081/re-hcb-soap"
+        - "http://host:8081/re-hcb-soap"
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: localhost:9115
+
+  - job_name: 'blackbox_smsgate_load1'
+    metrics_path: /probe
+    params:
+      module: [smsgate_load1]
+    static_configs:
+      - targets:
+        - "http://host:8081/re-hcb-soap"
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: localhost:9115
+
+  - job_name: 'blackbox_smsgate_load2'
+    metrics_path: /probe
+    params:
+      module: [smsgate_load2]
+    static_configs:
+      - targets:
+        - "http://host:8081/re-hcb-soap"
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: localhost:9115
